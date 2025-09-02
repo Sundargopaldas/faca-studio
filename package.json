@@ -1,0 +1,86 @@
+{
+  "name": "pactmaker-studio",
+  "version": "1.0.0",
+  "description": "Plataforma para criação e otimização de facas de corte para embalagens",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "nodemon src/server.js",
+    "client": "cd public && npm start",
+    "build": "cd public && npm run build",
+    "start": "node src/server.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/ public/",
+    "lint:fix": "eslint src/ public/ --fix",
+    "format": "prettier --write \"src/**/*.{js,jsx}\" \"public/**/*.{js,jsx,scss,css}\"",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
+  },
+  "keywords": [
+    "packaging",
+    "die-cutting",
+    "knife-design",
+    "3d-visualization",
+    "optimization",
+    "manufacturing"
+  ],
+  "author": "PactMaker Studio Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/seu-usuario/pactmaker-studio.git"
+  },
+  "bugs": {
+    "url": "https://github.com/seu-usuario/pactmaker-studio/issues"
+  },
+  "homepage": "https://pactmaker.com",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "morgan": "^1.10.0",
+    "dotenv": "^16.3.1",
+    "mongoose": "^8.0.3",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "aws-sdk": "^2.1490.0",
+    "nodemailer": "^6.9.7",
+    "pdfkit": "^0.14.0",
+    "sharp": "^0.32.6",
+    "socket.io": "^4.7.4",
+    "compression": "^1.7.4",
+    "express-rate-limit": "^7.1.5",
+    "express-validator": "^7.0.1",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "eslint": "^8.55.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "prettier": "^3.1.1",
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+} 

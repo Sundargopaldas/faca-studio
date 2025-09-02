@@ -1,0 +1,173 @@
+version: '3.8'
+
+services:
+  # ========================================
+  # BACKEND API
+  # ========================================
+  backend:
+    build:
+      context: .
+      dockerfile: deployment/docker/Dockerfile.backend
+    container_name: pactmaker-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - MONGODB_URI=mongodb://mongodb:27017/pactmaker_studio
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - ./src:/app/src
+      - ./data:/app/data
+      - ./logs:/app/logs
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - pactmaker-network
+    restart: unless-stopped
+
+  # ========================================
+  # FRONTEND CLIENT
+  # ========================================
+  frontend:
+    build:
+      context: .
+      dockerfile: deployment/docker/Dockerfile.frontend
+    container_name: pactmaker-frontend
+    ports:
+      - "3001:3001"
+    environment:
+      - REACT_APP_API_URL=http://localhost:3000
+      - REACT_APP_ENV=development
+    volumes:
+      - ./public:/app/public
+      - ./public/node_modules:/app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - pactmaker-network
+    restart: unless-stopped
+
+  # ========================================
+  # MONGODB DATABASE
+  # ========================================
+  mongodb:
+    image: mongo:7.0
+    container_name: pactmaker-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=pactmaker_studio
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password123
+    volumes:
+      - mongodb_data:/data/db
+      - ./data/database/backup:/backup
+    networks:
+      - pactmaker-network
+    restart: unless-stopped
+
+  # ========================================
+  # REDIS CACHE
+  # ========================================
+  redis:
+    image: redis:7-alpine
+    container_name: pactmaker-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - pactmaker-network
+    restart: unless-stopped
+
+  # ========================================
+  # NGINX REVERSE PROXY
+  # ========================================
+  nginx:
+    image: nginx:alpine
+    container_name: pactmaker-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deployment/docker/nginx.conf:/etc/nginx/nginx.conf
+      - ./deployment/docker/ssl:/etc/nginx/ssl
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - pactmaker-network
+    restart: unless-stopped
+
+  # ========================================
+  # MINIO (S3 COMPATIBLE STORAGE)
+  # ========================================
+  minio:
+    image: minio/minio:latest
+    container_name: pactmaker-minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin123
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - pactmaker-network
+    restart: unless-stopped
+
+  # ========================================
+  # MAILHOG (EMAIL TESTING)
+  # ========================================
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: pactmaker-mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - pactmaker-network
+    restart: unless-stopped
+
+  # ========================================
+  # JUPYTER NOTEBOOK (ANÁLISE DE DADOS)
+  # ========================================
+  jupyter:
+    image: jupyter/datascience-notebook:latest
+    container_name: pactmaker-jupyter
+    ports:
+      - "8888:8888"
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - JUPYTER_TOKEN=dev123
+    volumes:
+      - ./data:/home/jovyan/data
+      - ./notebooks:/home/jovyan/notebooks
+    networks:
+      - pactmaker-network
+    restart: unless-stopped
+
+# ========================================
+# VOLUMES
+# ========================================
+volumes:
+  mongodb_data:
+    driver: local
+  redis_data:
+    driver: local
+  minio_data:
+    driver: local
+
+# ========================================
+# NETWORKS
+# ========================================
+networks:
+  pactmaker-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16 
