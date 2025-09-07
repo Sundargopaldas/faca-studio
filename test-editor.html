@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Editor - PactMaker Studio</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #2563eb;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Teste do Editor PactMaker Studio</h1>
+        
+        <div class="test-section">
+            <h3>1. Teste de Carregamento de Produtos</h3>
+            <button class="test-button" onclick="testLoadProducts()">Carregar Produtos</button>
+            <div id="productsResult" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>2. Teste de Seleção de Produto</h3>
+            <button class="test-button" onclick="testSelectProduct()">Selecionar Produto</button>
+            <div id="selectResult" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>3. Teste de Geração de Faca</h3>
+            <button class="test-button" onclick="testGenerateKnife()">Gerar Faca</button>
+            <div id="generateResult" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>4. Teste de Exportação</h3>
+            <button class="test-button" onclick="testExport()">Exportar SVG</button>
+            <div id="exportResult" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>5. Status do Sistema</h3>
+            <div id="systemStatus" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        // Simular KnifeCreator para teste
+        window.knifeCreator = {
+            currentProduct: null,
+            currentProject: null,
+            knifeData: null,
+            
+            loadFallbackProducts: function() {
+                return [
+                    {
+                        id: 1,
+                        name: 'Caixa de Bolo Simples',
+                        category: 'alimentos',
+                        description: 'Caixa quadrada para bolos e tortas',
+                        dimensions: {
+                            width: { min: 15, max: 50, default: 25 },
+                            height: { min: 5, max: 20, default: 10 },
+                            depth: { min: 15, max: 50, default: 25 }
+                        },
+                        materials: ['papel_300g', 'papel_250g'],
+                        template: 'caixa_bolo_simples'
+                    }
+                ];
+            },
+            
+            generateLocalKnife: function() {
+                return {
+                    id: Date.now(),
+                    projectId: Date.now(),
+                    productId: 1,
+                    dimensions: { width: 25, height: 10, depth: 25 },
+                    svg: '<svg width="250" height="100" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="250" height="100" fill="none" stroke="#ff0000" stroke-width="2"/><text x="125" y="50" text-anchor="middle">Teste SVG</text></svg>',
+                    layout: {
+                        efficiency: 75.5,
+                        waste_percentage: 24.5,
+                        total_pieces: 4,
+                        estimated_cost: 2.50
+                    },
+                    metadata: {
+                        template: 'caixa_bolo_simples',
+                        material: 'papel_300g',
+                        generatedAt: new Date().toISOString()
+                    }
+                };
+            }
+        };
+
+        function showResult(elementId, message, isSuccess = true) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.className = `result ${isSuccess ? 'success' : 'error'}`;
+            element.innerHTML = message;
+        }
+
+        function testLoadProducts() {
+            try {
+                const products = window.knifeCreator.loadFallbackProducts();
+                showResult('productsResult', `✅ ${products.length} produtos carregados com sucesso!<br>Produtos: ${products.map(p => p.name).join(', ')}`);
+            } catch (error) {
+                showResult('productsResult', `❌ Erro ao carregar produtos: ${error.message}`, false);
+            }
+        }
+
+        function testSelectProduct() {
+            try {
+                const products = window.knifeCreator.loadFallbackProducts();
+                window.knifeCreator.currentProduct = products[0];
+                showResult('selectResult', `✅ Produto selecionado: ${window.knifeCreator.currentProduct.name}<br>Categoria: ${window.knifeCreator.currentProduct.category}`);
+            } catch (error) {
+                showResult('selectResult', `❌ Erro ao selecionar produto: ${error.message}`, false);
+            }
+        }
+
+        function testGenerateKnife() {
+            try {
+                if (!window.knifeCreator.currentProduct) {
+                    throw new Error('Nenhum produto selecionado');
+                }
+                
+                window.knifeCreator.knifeData = window.knifeCreator.generateLocalKnife();
+                showResult('generateResult', `✅ Faca gerada com sucesso!<br>Eficiência: ${window.knifeCreator.knifeData.layout.efficiency}%<br>Custo: R$ ${window.knifeCreator.knifeData.layout.estimated_cost}`);
+            } catch (error) {
+                showResult('generateResult', `❌ Erro ao gerar faca: ${error.message}`, false);
+            }
+        }
+
+        function testExport() {
+            try {
+                if (!window.knifeCreator.knifeData) {
+                    throw new Error('Nenhuma faca gerada');
+                }
+                
+                const svg = window.knifeCreator.knifeData.svg;
+                const blob = new Blob([svg], { type: 'image/svg+xml' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'teste_faca.svg';
+                document.body.appendChild(a);
+                a.click();
+                URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                showResult('exportResult', '✅ SVG exportado com sucesso!<br>Arquivo: teste_faca.svg');
+            } catch (error) {
+                showResult('exportResult', `❌ Erro ao exportar: ${error.message}`, false);
+            }
+        }
+
+        function updateSystemStatus() {
+            const status = document.getElementById('systemStatus');
+            let statusHtml = '<h4>Status do Sistema:</h4>';
+            
+            // Verificar componentes
+            statusHtml += `• KnifeCreator: ${window.knifeCreator ? '✅ Carregado' : '❌ Não encontrado'}<br>`;
+            statusHtml += `• Produto Selecionado: ${window.knifeCreator?.currentProduct ? '✅ ' + window.knifeCreator.currentProduct.name : '❌ Nenhum'}<br>`;
+            statusHtml += `• Faca Gerada: ${window.knifeCreator?.knifeData ? '✅ Sim' : '❌ Não'}<br>`;
+            statusHtml += `• Navegador: ${navigator.userAgent.includes('Chrome') ? '✅ Chrome' : '⚠️ ' + navigator.userAgent.split(' ')[0]}<br>`;
+            
+            status.innerHTML = statusHtml;
+        }
+
+        // Atualizar status a cada 2 segundos
+        setInterval(updateSystemStatus, 2000);
+        updateSystemStatus();
+    </script>
+</body>
+</html>
+
